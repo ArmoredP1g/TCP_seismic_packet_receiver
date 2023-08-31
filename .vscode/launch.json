@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+    {
+        "name": "For Debug",
+        "type": "cppdbg",
+        "request": "launch",
+        "preLaunchTask": "数据包发送端",
+        "program": "/mnt/d/source/repos/TCP_seismic_packet_receiver/PackageSubmitter",
+        // 参数搁这写
+        //"args": ["-vv", "-u", "-pp", "-r", "127.0.0.1:8848", "-s", "BHE.D", "-o", "data.mseed", "127.0.0.1:18001"],172.21.128.1  192.168.153.129:6379
+        "args": ["127.0.0.1", "6666"],
+        //"args": ["-vv", "-u", "-pp", "-s", "BHE.D", "-o", "data.mseed", "127.0.0.1:18001"],
+        "cwd": "${workspaceFolder}"
+    }
+    ]
+}
