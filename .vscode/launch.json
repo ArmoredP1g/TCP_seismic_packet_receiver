@@ -2,12 +2,24 @@
     "version": "0.2.0",
     "configurations": [
         
+    // {
+    //     "name": "For Debug",
+    //     "type": "cppdbg",
+    //     "request": "launch",
+    //     "preLaunchTask": "地震数据包接收解析",
+    //     "program": "/mnt/d/source/repos/TCP_seismic_packet_receiver/SeismicPackReceiver",
+    //     // 参数搁这写
+    //     //"args": ["-vv", "-u", "-pp", "-r", "127.0.0.1:8848", "-s", "BHE.D", "-o", "data.mseed", "127.0.0.1:18001"],172.21.128.1  192.168.153.129:6379
+    //     "args": ["6666"],
+    //     //"args": ["-vv", "-u", "-pp", "-s", "BHE.D", "-o", "data.mseed", "127.0.0.1:18001"],
+    //     "cwd": "${workspaceFolder}"
+    // },
     {
-        "name": "For Debug",
+        "name": "For Debug2",
         "type": "cppdbg",
         "request": "launch",
-        "preLaunchTask": "数据包发送端",
-        "program": "/mnt/d/source/repos/TCP_seismic_packet_receiver/PackageSubmitter",
+        "preLaunchTask": "地震数据包发送模拟",
+        "program": "/mnt/d/source/repos/TCP_seismic_packet_receiver/SeismicPackSender",
         // 参数搁这写
         //"args": ["-vv", "-u", "-pp", "-r", "127.0.0.1:8848", "-s", "BHE.D", "-o", "data.mseed", "127.0.0.1:18001"],172.21.128.1  192.168.153.129:6379
         "args": ["127.0.0.1", "6666"],
