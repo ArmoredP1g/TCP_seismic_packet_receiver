@@ -16,6 +16,8 @@ int main(int argc, char** argv) {
     int listenfd, connfd=-1;                        // 监听套接字和连接套接字
     struct sockaddr_in servaddr;                 // 服务器地址结构体
     char buff[4096*4];                             // 缓冲区
+    char* cur = buff;                                  // 指向当前待写入位置
+    uint32_t tail = 0X8B8B7474;                     
     int port;                                    // 端口号
     int n;                                       // 接收到的字节数
 
@@ -55,7 +57,7 @@ int main(int argc, char** argv) {
 
 
     while (1) {
-        if ((n = recv(connfd, buff, sizeof(buff) - 1, 0)) <= 0 || connfd==-1) {
+        if ((n = recv(connfd, (void*)cur, sizeof(buff) - (cur - buff) - 1, 0)) <= 0 || connfd==-1) {
             printf("======waiting for client's request======\n");
 
             if ((connfd = accept(listenfd, (struct sockaddr*)NULL, NULL)) == -1) {
@@ -65,20 +67,30 @@ int main(int argc, char** argv) {
             continue;
         }
 
-        buff[n] = '\0';                            // 在接收到的数据末尾添加字符串结束符
-        
-        /*解析数据包到结构体中*/
-        char* p = buff;
-        Packet pack = SeismicPackParser(p);
+        // 判断是否到达包尾部
+        if (cur - buff + n >= 4 && memcmp(cur + n - 4, (char*)&tail, 4) == 0) {
+            cur[n] = '\0';
+            char* p = buff;
+            Packet pack = SeismicPackParser(p);
 
-        // 打印数据包信息
-        std::cout << "数据包长度：\t" << pack.header.packet_length << std::endl;
-        std::cout << "数据组数：\t" << pack.header.group_count << std::endl;
-        std::cout << "时间：\t" << pack.header.time.year << std::endl;
-        std::cout << "包头：\t" << std::endl;
-        printf("0x%08x\n", pack.header.header);
-        std::cout << "包尾：\t" << std::endl;
-        printf("0x%08x\n", pack.tail);
+            // 打印数据包信息
+            std::cout << "数据包长度：\t" << pack.header.packet_length << std::endl;
+            std::cout << "数据组数：\t" << pack.header.group_count << std::endl;
+            std::cout << "时间：\t" << pack.header.time.year << std::endl;
+            std::cout << "包头：\t" << std::endl;
+            printf("0x%08x\n", pack.header.header);
+            std::cout << "包尾：\t" << std::endl;
+            printf("0x%08x\n", pack.tail);
+
+            cur = buff; //归位
+        }
+
+        else {
+            cur += n;
+            std::cout << "接收到不完整的数据包" << std::endl;
+
+        }
+
     }
 
     if (n < 0) {

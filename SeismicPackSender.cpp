@@ -25,11 +25,12 @@ private:
 int main(int argc, char** argv) {
     int sockfd;
     int port;
+    int split_flag;
     struct sockaddr_in servaddr;
     SeismicPackConstructor seismicPackConstructor;
     
-    if (argc != 3) {
-        std::cout << "usage: ./client <ipaddr> <port>" << std::endl;
+    if (argc != 4) {
+        std::cout << "usage: ./client <ipaddr> <port> <split_flag>" << std::endl;
         return 0;
     }
 
@@ -45,6 +46,14 @@ int main(int argc, char** argv) {
     }
     catch (const std::invalid_argument& e) {
         std::cout << "check your port" << std::endl;
+    }
+
+    // 获取拆分标志参数
+    try {
+        split_flag = std::stoi(argv[3]);
+    }
+    catch (const std::invalid_argument& e) {
+        std::cout << "check your split_flag" << std::endl;
     }
 
     // 创建套接字
@@ -83,12 +92,31 @@ int main(int argc, char** argv) {
         // 生成随机整数
         int group = dis(gen);
         int len = dis(gen);
-        // 每秒间隔，发送不定长的地震数据包
+        // 发送不定长的地震数据包
         char* p = seismicPackConstructor.TestPacket(group, len);
-        if (send(sockfd, p, seismicPackConstructor.testPacket.header.packet_length, 0) < 0) {
-            printf("send msg error: %s(errno: %d)\n", strerror(errno), errno);
-            continue;
+        if (split_flag) {
+            // 间隔3秒分两段发送数据包
+            int mid = seismicPackConstructor.testPacket.header.packet_length/2;
+            char* p2 = p;
+            if (send(sockfd, p2, mid, 0) < 0) {
+                printf("send msg error: %s(errno: %d)\n", strerror(errno), errno);
+                continue;
+            }
+            p2 += mid;
+            sleep(3);
+            if (send(sockfd, p2, seismicPackConstructor.testPacket.header.packet_length-mid, 0) < 0) {
+                printf("send msg error: %s(errno: %d)\n", strerror(errno), errno);
+                continue;
+            }
         }
+        else {
+            // 正常发送一个完整的数据包
+            if (send(sockfd, p, seismicPackConstructor.testPacket.header.packet_length, 0) < 0) {
+                printf("send msg error: %s(errno: %d)\n", strerror(errno), errno);
+                continue;
+            }
+        }
+
 
         std::cout << "数据包已发送" << std::endl;
         delete[] p;
